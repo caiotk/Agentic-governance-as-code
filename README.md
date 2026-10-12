@@ -1,10 +1,10 @@
-# Agent Governance as Code
+# Agentic Governance as Code
 
 **GenAI answers. Agents act.** A wrong answer is a quality issue; a wrong action is an incident.
 
 This repository turns five operational controls for autonomous AI agents into code that runs in CI and at runtime, with no dependence on any particular agent framework, model or vendor. Every agent is described by a manifest, scored for risk, held to the controls its risk tier demands, and attacked by adversarial probes on every pull request. Non-compliant agents never reach production.
 
-**Live dashboard:** https://caiotk.github.io/agent-governance-as-code/
+**Live dashboard:** https://caiotk.github.io/agentic-governance-as-code/
 
 | | Control | Enforced by |
 |---|---|---|
@@ -89,7 +89,7 @@ spec:
   # …lifecycle: see agents/claims-payment-agent.yaml
 ```
 
-Try your own in the [dashboard playground](https://caiotk.github.io/agent-governance-as-code/#playground). It runs the same static rules in your browser.
+Try your own in the [dashboard playground](https://caiotk.github.io/agentic-governance-as-code/#playground). It runs the same static rules in your browser.
 
 ## Runtime control plane
 
@@ -107,7 +107,7 @@ npm run serve   # http://127.0.0.1:8787
 | `POST /api/agents/:id/quarantine` · `/release` | Kill switch, with release attributed to a named human *(admin)* |
 | `GET /api/audit` | Audit entries, chain integrity and alerts *(admin)* |
 
-`docker build -t agent-governance . && docker run -e ADMIN_KEY=… -e GOV_SIGNING_SECRET=… -p 8787:8787 agent-governance`
+`docker build -t agentic-governance . && docker run -e ADMIN_KEY=… -e GOV_SIGNING_SECRET=… -p 8787:8787 agentic-governance`
 
 ### Before production use
 

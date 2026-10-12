@@ -1,5 +1,5 @@
 {
-  "name": "agent-governance-as-code",
+  "name": "agentic-governance-as-code",
   "version": "0.1.0",
   "description": "Framework-agnostic governance-as-code for autonomous AI agents: risk-proportional oversight, deterministic guardrails, agent identities, isolated execution and human-in-the-loop — enforced in CI and at runtime.",
   "type": "module",

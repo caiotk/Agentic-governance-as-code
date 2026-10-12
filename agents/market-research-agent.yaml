@@ -1,0 +1,50 @@
+apiVersion: governance/v1
+kind: Agent
+metadata:
+  id: market-research-agent
+  name: Market Research Agent
+  owner: research team
+  team: Strategy
+  description: Gathers public statistics for market reports and saves them to the shared drive.
+
+spec:
+  lifecycle:
+    stage: production
+
+  risk:
+    dataClassification: internal
+    actions: write
+    exposure: public
+    reversibility: reversible
+    regulated: false
+
+  identity:
+    principal: research-team-shared
+    credentialTtlMinutes: 1440
+    scopes: ["*"]
+
+  tools:
+    - name: web.fetch
+      effect: read
+      scope: web:read
+      args:
+        query: { type: string }
+
+    - name: drive.upload
+      effect: write
+      scope: drive:write
+      args:
+        path: { type: string }
+        content: { type: string }
+
+  guardrails:
+    denyOnUnknownTool: false
+
+  execution:
+    sandbox: none
+    network:
+      egress: ["*"]
+
+  oversight:
+    monitoring:
+      telemetry: false

@@ -4,7 +4,7 @@
 
 This repository turns five operational controls for autonomous AI agents into code that runs in CI and at runtime, with no dependence on any particular agent framework, model or vendor. Every agent is described by a manifest, scored for risk, held to the controls its risk tier demands, and attacked by adversarial probes on every pull request. Non-compliant agents never reach production.
 
-**Live dashboard:** https://caiotk.github.io/agentic-governance-as-code/
+**Live dashboard:** https://caiotk.github.io/Agentic-governance-as-code/
 
 | | Control | Enforced by |
 |---|---|---|
@@ -89,7 +89,7 @@ spec:
   # …lifecycle: see agents/claims-payment-agent.yaml
 ```
 
-Try your own in the [dashboard playground](https://caiotk.github.io/agentic-governance-as-code/#playground). It runs the same static rules in your browser.
+Try your own in the [dashboard playground](https://caiotk.github.io/Agentic-governance-as-code/#playground). It runs the same static rules in your browser.
 
 ## Runtime control plane
 

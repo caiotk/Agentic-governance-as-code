@@ -1,0 +1,50 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Tier policy — the single source of truth for risk-proportional oversight.
+#
+# Every agent manifest is scored against `scoring`, mapped to the first tier
+# whose `maxScore` it fits under, and then held to that tier's obligations.
+# Change this file through a pull request: the governance gate re-evaluates
+# every registered agent against the new policy before it can merge.
+#
+# Unknown or missing risk attributes score at the HIGHEST weight (fail closed).
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: governance/v1
+kind: TierPolicy
+
+scoring:
+  dataClassification: { public: 0, internal: 1, confidential: 2, restricted: 3 }
+  actions:            { read: 0, write: 1, transact: 3 }
+  exposure:           { internal: 0, customer: 1, public: 2 }
+  irreversible: 2   # added when risk.reversibility == irreversible
+  regulated: 2      # added when risk.regulated == true
+
+tiers:
+  - tier: 1
+    label: Low
+    maxScore: 2
+    maxReviewDays: 365
+    maxCredentialTtlMinutes: 60
+    allowedSandboxes: [process, container, vm]
+    requireKillSwitch: false
+    requireRateLimits: false
+    requiredProbes: [boundary-probe, schema-injection, audit-integrity]
+
+  - tier: 2
+    label: Elevated
+    maxScore: 6
+    maxReviewDays: 180
+    maxCredentialTtlMinutes: 30
+    allowedSandboxes: [container, vm]
+    requireKillSwitch: true
+    requireRateLimits: true
+    requiredProbes: [boundary-probe, schema-injection, audit-integrity, scope-escalation, expired-credential]
+
+  - tier: 3
+    label: Critical
+    maxScore: 999
+    maxReviewDays: 90
+    maxCredentialTtlMinutes: 15
+    allowedSandboxes: [container, vm]
+    requireKillSwitch: true
+    requireRateLimits: true
+    requiredProbes: [boundary-probe, schema-injection, audit-integrity, scope-escalation, expired-credential, spend-limit, hitl-bypass]

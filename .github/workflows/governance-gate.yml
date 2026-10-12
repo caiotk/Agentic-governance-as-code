@@ -1,0 +1,60 @@
+# Validate → Test
+# Every pull request re-evaluates every agent manifest against the tier policy
+# and attacks each agent's real guard with the adversarial probes its tier
+# requires. A single failed control blocks the merge.
+name: Governance gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Agent governance gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type-check the policy engine
+        run: npm run typecheck
+
+      - name: Unit-test the controls
+        run: npm test
+
+      - name: Evaluate agents against policy and run adversarial probes
+        id: gate
+        run: |
+          set +e
+          npx tsx src/cli.ts validate agents --markdown gate.md
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Post the result on the pull request
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR" --edit-last --body-file gate.md || gh pr comment "$PR" --body-file gate.md
+
+      - name: Enforce the gate
+        if: steps.gate.outputs.exit != '0'
+        run: |
+          echo "::error title=Governance gate::One or more agents do not meet the controls their risk tier requires. See the job summary."
+          exit 1

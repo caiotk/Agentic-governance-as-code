@@ -1,0 +1,54 @@
+# Monitor → Support
+# Re-evaluates every registered agent daily. When a review falls due or a
+# control degrades, it opens (or updates) an issue for the owners; when drift
+# clears, it closes the issue.
+name: Governance drift monitor
+
+on:
+  schedule:
+    - cron: '17 19 * * *'   # daily, 08:17 NZDT
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Re-evaluate all agents
+        id: drift
+        run: npx tsx src/cli.ts drift agents --markdown drift.md
+
+      - name: Open or update the drift issue
+        if: steps.drift.outputs.drift == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create governance-drift --color D93F0B --description "Agent governance drift" --force
+          existing=$(gh issue list --label governance-drift --state open --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --body-file drift.md
+            gh issue comment "$existing" --body "Still drifting as of $(date -u +%Y-%m-%d). Report refreshed above."
+          else
+            gh issue create --title "Agent governance drift detected" --label governance-drift --body-file drift.md
+          fi
+
+      - name: Close the drift issue when clear
+        if: steps.drift.outputs.drift == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for n in $(gh issue list --label governance-drift --state open --json number --jq '.[].number'); do
+            gh issue close "$n" --comment "Drift cleared on $(date -u +%Y-%m-%d): every agent is within policy."
+          done

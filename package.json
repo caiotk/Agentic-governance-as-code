@@ -1,0 +1,30 @@
+{
+  "name": "agent-governance-as-code",
+  "version": "0.1.0",
+  "description": "Framework-agnostic governance-as-code for autonomous AI agents: risk-proportional oversight, deterministic guardrails, agent identities, isolated execution and human-in-the-loop — enforced in CI and at runtime.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Caio Augusto Tkalec",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "validate": "tsx src/cli.ts validate agents",
+    "drift": "tsx src/cli.ts drift agents",
+    "report": "tsx src/cli.ts report agents --examples examples/unsafe --out site/data/report.json",
+    "build:engine": "esbuild src/browser.ts --bundle --format=esm --minify --target=es2022 --outfile=site/assets/engine.js",
+    "build:site": "npm run report && npm run build:engine",
+    "serve": "tsx src/server.ts"
+  },
+  "dependencies": {
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

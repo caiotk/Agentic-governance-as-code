@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Governance Control Plane</title>
+  <meta name="description" content="Governance-as-code for autonomous AI agents: risk-proportional oversight, deterministic guardrails, agent identities, isolated execution and human-in-the-loop, enforced in CI and at runtime.">
+  <meta property="og:title" content="Agent Governance Control Plane">
+  <meta property="og:description" content="Five operational controls for agentic AI, enforced as code across the full lifecycle.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="Agent Governance Control Plane, home">
+        <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>
+        <span>Agent Governance <em>Control Plane</em></span>
+      </a>
+      <nav aria-label="Sections">
+        <a href="#matrix">Controls</a>
+        <a href="#replay">Replay</a>
+        <a href="#playground">Playground</a>
+        <a href="#lifecycle">Lifecycle</a>
+        <a id="repo-link" href="#" class="nav-cta">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap" id="top">
+      <p class="kicker">Governance as code · framework-agnostic</p>
+      <h1>GenAI answers. <span class="accent">Agents act.</span></h1>
+      <p class="lede">Every agent below is described in a manifest, scored for risk, held to the controls its tier demands and attacked by adversarial probes on every pull request. Non-compliant agents never reach production.</p>
+      <p class="meta" id="meta">Loading the latest governance report…</p>
+      <div class="stats" id="stats" aria-live="polite"></div>
+    </section>
+
+    <section class="wrap block" id="matrix" aria-labelledby="matrix-h">
+      <div class="block-head">
+        <h2 id="matrix-h">Control matrix</h2>
+        <p>Select an agent to see its findings, profile and probe transcripts.</p>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span><b>C1</b> Risk-proportional oversight</span>
+        <span><b>C2</b> Deterministic guardrails</span>
+        <span><b>C3</b> Agents as privileged identities</span>
+        <span><b>C4</b> Isolated execution</span>
+        <span><b>C5</b> Human-in-the-loop</span>
+        <span><b>LC</b> Lifecycle</span>
+      </div>
+      <div class="table-scroll">
+        <table class="matrix">
+          <caption class="sr-only">Compliance of each registered agent with the five controls and lifecycle</caption>
+          <thead>
+            <tr>
+              <th scope="col">Agent</th><th scope="col">Tier</th><th scope="col">Stage</th>
+              <th scope="col" title="Risk-proportional oversight">C1</th>
+              <th scope="col" title="Deterministic guardrails">C2</th>
+              <th scope="col" title="Agents as privileged identities">C3</th>
+              <th scope="col" title="Isolated execution">C4</th>
+              <th scope="col" title="Human-in-the-loop">C5</th>
+              <th scope="col" title="Lifecycle">LC</th>
+              <th scope="col">Gate</th>
+            </tr>
+          </thead>
+          <tbody id="matrix-body"></tbody>
+        </table>
+      </div>
+      <div id="detail" class="detail" aria-live="polite"></div>
+    </section>
+
+    <section class="wrap block" id="replay" aria-labelledby="replay-h">
+      <div class="block-head">
+        <h2 id="replay-h">The boundary probe, replayed</h2>
+        <p>In June 2026 an AI research agent hit access blocks on Australia’s Medicare statistics portal, worked around them, reached non-public files and wrote data. The boundary probe re-runs that pattern against every agent: tell it “no”, then watch what it does next.</p>
+      </div>
+      <div class="replay" id="replay-body"></div>
+    </section>
+
+    <section class="wrap block" id="playground" aria-labelledby="play-h">
+      <div class="block-head">
+        <h2 id="play-h">Manifest playground</h2>
+        <p>Paste an agent manifest and run the same static policy checks the CI gate runs. Nothing leaves your browser. Adversarial probes run in CI against the live guard.</p>
+      </div>
+      <div class="play">
+        <div class="play-input">
+          <label for="yaml">Agent manifest (YAML)</label>
+          <textarea id="yaml" spellcheck="false" rows="22"></textarea>
+          <div class="play-actions">
+            <button type="button" id="run" class="btn primary">Evaluate manifest</button>
+            <button type="button" id="load-unsafe" class="btn">Load unsafe example</button>
+            <button type="button" id="load-safe" class="btn">Load governed example</button>
+          </div>
+        </div>
+        <div class="play-output" id="play-out" aria-live="polite">
+          <p class="muted">Results appear here.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap block" id="lifecycle" aria-labelledby="lc-h">
+      <div class="block-head">
+        <h2 id="lc-h">Not a go-live gate. The full lifecycle.</h2>
+        <p>Each stage is automated in the repository, so governance moves at the speed of a pull request.</p>
+      </div>
+      <ol class="pipeline">
+        <li><span class="step">01</span><h3>Validate</h3><p>The manifest records the use case, who validated it, the risk profile and a named owner. Undeclared risk scores at maximum.</p><code>spec.lifecycle.validated</code></li>
+        <li><span class="step">02</span><h3>Test</h3><p>Adversarial probes attack each agent’s real guard: boundary-probing, injection, scope escalation, expired credentials, spend and approval bypass.</p><code>governance-gate.yml</code></li>
+        <li><span class="step">03</span><h3>Productionise</h3><p>Deploys run only after the gate passes. At runtime the control plane admits compliant agents only, with signed short-lived credentials.</p><code>deploy-dashboard.yml · src/server.ts</code></li>
+        <li><span class="step">04</span><h3>Monitor</h3><p>Every decision lands in a hash-chained audit log. Denials alert; repeated denials trip the circuit breaker and quarantine the agent.</p><code>src/guard.ts</code></li>
+        <li><span class="step">05</span><h3>Support</h3><p>A daily drift monitor re-evaluates every agent and opens an issue for its owner when a review falls due or a control degrades.</p><code>drift-monitor.yml · docs/runbooks</code></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <p>Built by <a href="https://www.linkedin.com/in/caiotk">Caio Augusto Tkalec</a>. Reference implementation, MIT licensed.</p>
+      <p class="muted" id="footer-meta"></p>
+    </div>
+  </footer>
+
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>

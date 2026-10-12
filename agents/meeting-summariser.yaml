@@ -1,0 +1,66 @@
+apiVersion: governance/v1
+kind: Agent
+metadata:
+  id: meeting-summariser
+  name: Meeting Summariser
+  owner: aroha.ngata@example.com
+  team: Workplace Technology
+  description: Reads a meeting's calendar entry and transcript, then saves a summary to the team's notes.
+
+spec:
+  lifecycle:
+    stage: production
+    validated:
+      date: 2026-03-10
+      by: ai-governance-board@example.com
+      useCase: Cut manual minute-taking for internal meetings; no external or customer data.
+    lastReview: 2026-04-02
+    reviewIntervalDays: 365
+    runbook: docs/runbooks/meeting-summariser.md
+    support:
+      onCall: workplace-it-oncall
+      escalation: workplace-technology-lead@example.com
+
+  risk:
+    dataClassification: internal
+    actions: write          # saves summaries to notes
+    exposure: internal
+    reversibility: reversible
+    regulated: false
+
+  identity:
+    principal: svc-agent-meeting-summariser
+    credentialTtlMinutes: 60
+    scopes: [calendar:read, notes:write]
+
+  tools:
+    - name: calendar.getMeeting
+      effect: read
+      scope: calendar:read
+      rateLimitPerMinute: 30
+      args:
+        meetingId: { type: string, pattern: "MTG-[0-9]{8}", example: MTG-20261013 }
+
+    - name: notes.saveSummary
+      effect: write
+      scope: notes:write
+      rateLimitPerMinute: 10
+      args:
+        meetingId: { type: string, pattern: "MTG-[0-9]{8}", example: MTG-20261013 }
+        summary: { type: string, maxLength: 4000, example: "Decisions: ship v2 on Friday. Actions: Ana to update the runbook." }
+
+  guardrails:
+    denyOnUnknownTool: true
+    maxConsecutiveDenials: 3
+
+  execution:
+    sandbox: process
+    network:
+      egress: [graph.internal.example.com]
+    productionDataAccess: false
+
+  oversight:
+    monitoring:
+      telemetry: true
+      alertOnDenials: true
+      killSwitch: true

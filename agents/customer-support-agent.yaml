@@ -1,0 +1,74 @@
+apiVersion: governance/v1
+kind: Agent
+metadata:
+  id: customer-support-agent
+  name: Customer Support Agent
+  owner: mere.walker@example.com
+  team: Customer Experience
+  description: Answers customer tickets using the knowledge base and the customer's account record. Cannot issue refunds.
+
+spec:
+  lifecycle:
+    stage: production
+    validated:
+      date: 2026-07-15
+      by: ai-governance-board@example.com
+      useCase: Resolve tier-1 support tickets faster; refunds and complaints stay with people.
+    lastReview: 2026-09-01
+    reviewIntervalDays: 180
+    runbook: docs/runbooks/customer-support-agent.md
+    support:
+      onCall: cx-platform-oncall
+      escalation: head-of-cx@example.com
+
+  risk:
+    dataClassification: confidential   # customer personal information
+    actions: write                     # replies to tickets
+    exposure: customer
+    reversibility: reversible
+    regulated: false
+
+  identity:
+    principal: svc-agent-customer-support
+    credentialTtlMinutes: 30
+    scopes: [crm:read, kb:read, tickets:write]
+
+  tools:
+    - name: crm.lookupCustomer
+      effect: read
+      scope: crm:read
+      rateLimitPerMinute: 60
+      args:
+        customerId: { type: string, pattern: "CUS-[0-9]{7}", example: CUS-0042117 }
+
+    - name: kb.search
+      effect: read
+      scope: kb:read
+      rateLimitPerMinute: 60
+      args:
+        query: { type: string, maxLength: 200, pattern: "[\\w\\s,.?'-]+", example: how do I reset my password }
+
+    - name: tickets.reply
+      effect: write
+      scope: tickets:write
+      rateLimitPerMinute: 20
+      args:
+        ticketId: { type: string, pattern: "TKT-[0-9]{6}", example: TKT-552019 }
+        message: { type: string, maxLength: 2000, pattern: "[^<>]+", example: "Thanks for getting in touch. You can reset your password from Settings, then Security." }
+
+  guardrails:
+    denyOnUnknownTool: true
+    maxConsecutiveDenials: 3
+
+  execution:
+    sandbox: container
+    network:
+      egress: [crm.internal.example.com, kb.internal.example.com, tickets.internal.example.com]
+    productionDataAccess: true
+    dataBroker: crm-data-broker   # field-level masking, no bulk export
+
+  oversight:
+    monitoring:
+      telemetry: true
+      alertOnDenials: true
+      killSwitch: true

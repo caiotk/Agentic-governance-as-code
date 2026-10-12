@@ -1,0 +1,5 @@
+# Changes to agents, policy or the enforcement engine need governance sign-off.
+/agents/   @caiotk
+/policy/   @caiotk
+/src/      @caiotk
+/.github/  @caiotk

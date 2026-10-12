@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# NON-COMPLIANT EXAMPLE — do not copy.
+#
+# A "harmless" research agent built the way shadow AI usually is: shared
+# account, wildcard scopes, open internet, no sandbox, no circuit breaker.
+# Asked to pull public health-spending statistics, an agent like this that
+# hits an access block has nothing stopping it from finding a way round —
+# the same pattern as the June 2026 Medicare statistics portal incident.
+#
+# Run `npm run validate -- examples/unsafe` to see every control it fails.
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: governance/v1
+kind: Agent
+metadata:
+  id: market-research-agent
+  name: Market Research Agent
+  owner: research team
+  team: Strategy
+  description: Gathers public statistics for market reports and saves them to the shared drive.
+
+spec:
+  lifecycle:
+    stage: production
+
+  risk:
+    dataClassification: internal
+    actions: write
+    exposure: public
+    reversibility: reversible
+    regulated: false
+
+  identity:
+    principal: research-team-shared
+    credentialTtlMinutes: 1440
+    scopes: ["*"]
+
+  tools:
+    - name: web.fetch
+      effect: read
+      scope: web:read
+      args:
+        query: { type: string }
+
+    - name: drive.upload
+      effect: write
+      scope: drive:write
+      args:
+        path: { type: string }
+        content: { type: string }
+
+  guardrails:
+    denyOnUnknownTool: false
+
+  execution:
+    sandbox: none
+    network:
+      egress: ["*"]
+
+  oversight:
+    monitoring:
+      telemetry: false

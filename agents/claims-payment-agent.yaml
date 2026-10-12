@@ -1,0 +1,81 @@
+apiVersion: governance/v1
+kind: Agent
+metadata:
+  id: claims-payment-agent
+  name: Claims Payment Agent
+  owner: tom.fifita@example.com
+  team: Claims Operations
+  description: Assesses straightforward insurance claims and prepares payments. Every payment needs a human approval.
+
+spec:
+  lifecycle:
+    stage: production
+    validated:
+      date: 2026-05-02
+      by: ai-governance-board@example.com
+      useCase: Shorten settlement time on low-value, low-complexity claims.
+    lastReview: 2026-06-20        # 90-day cycle — this review is overdue, so the drift monitor will flag it
+    reviewIntervalDays: 90
+    runbook: docs/runbooks/claims-payment-agent.md
+    support:
+      onCall: claims-platform-oncall
+      escalation: chief-risk-officer@example.com
+
+  risk:
+    dataClassification: restricted
+    actions: transact
+    exposure: customer
+    reversibility: irreversible
+    regulated: true
+
+  identity:
+    principal: svc-agent-claims-payment
+    credentialTtlMinutes: 15
+    scopes: [claims:read, claims:write, payments:issue]
+
+  tools:
+    - name: claims.lookup
+      effect: read
+      scope: claims:read
+      rateLimitPerMinute: 30
+      args:
+        claimId: { type: string, pattern: "CLM-[0-9]{6}", example: CLM-104233 }
+
+    - name: claims.assess
+      effect: write
+      scope: claims:write
+      rateLimitPerMinute: 20
+      args:
+        claimId: { type: string, pattern: "CLM-[0-9]{6}", example: CLM-104233 }
+        recommendation: { type: string, enum: [approve, decline, refer], example: approve }
+        rationale: { type: string, maxLength: 1000, pattern: "[^<>]+", example: Policy active; loss covered; within delegated limit. }
+
+    - name: payments.issue
+      effect: transact
+      scope: payments:issue
+      irreversible: true
+      requiresApproval: true
+      rateLimitPerMinute: 10
+      maxAmount: 5000
+      args:
+        claimId: { type: string, pattern: "CLM-[0-9]{6}", example: CLM-104233 }
+        currency: { type: string, enum: [NZD, AUD], example: NZD }
+
+  guardrails:
+    denyOnUnknownTool: true
+    maxConsecutiveDenials: 3
+    spendLimitPerDay: 20000
+
+  execution:
+    sandbox: vm
+    network:
+      egress: [claims.internal.example.com, payments.internal.example.com]
+    productionDataAccess: true
+    dataBroker: claims-data-broker
+
+  oversight:
+    approvers: [claims-lead@example.com, finance-controller@example.com]
+    monitoring:
+      telemetry: true
+      alertOnDenials: true
+      killSwitch: true

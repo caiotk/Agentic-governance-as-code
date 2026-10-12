@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { assess, assessDir, loadManifest, loadPolicy } from '../src/assess.js';
+import { assess, loadManifest, loadPolicy } from '../src/assess.js';
 import { evaluate, isExplicitEgress } from '../src/evaluate.js';
 import { ApprovalStore, AuditLog, egressAllowed, Guard, IdentityIssuer, ManualClock, validateArgs } from '../src/guard.js';
 import { runProbe } from '../src/probes.js';
@@ -54,8 +54,11 @@ describe('C1 · risk-proportional oversight', () => {
 });
 
 describe('static gate', () => {
-  it('passes every registered agent', () => {
-    for (const a of assessDir('agents', policy, { now: NOW })) assert.equal(a.evaluation.compliant, true, a.evaluation.agentId);
+  // Unit tests pin the reference manifests; judging whatever is in agents/ is the gate's job.
+  it('passes the three reference agents', () => {
+    for (const id of ['meeting-summariser', 'customer-support-agent', 'claims-payment-agent']) {
+      assert.equal(assess(`agents/${id}.yaml`, policy, { now: NOW }).evaluation.compliant, true, id);
+    }
   });
 
   it('blocks the unsafe example on every control it violates', () => {

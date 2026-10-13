@@ -130,4 +130,4 @@ docs/runbooks/       support runbooks per agent
 
 ---
 
-Built by [Caio Augusto Tkalec](https://www.linkedin.com/in/caiotk). MIT licensed.
+Built by [CaioTK](https://www.linkedin.com/in/caiotk). MIT licensed.
